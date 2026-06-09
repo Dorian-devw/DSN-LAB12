@@ -2,12 +2,29 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { calculatePoints } from '../utils/scoring.util';
+import { AchievementsService } from '../achievements/achievements.service';
+
+function getLevel(points: number): number {
+  if (points >= 1200) return 10;
+  if (points >= 850) return 9;
+  if (points >= 600) return 8;
+  if (points >= 400) return 7;
+  if (points >= 250) return 6;
+  if (points >= 150) return 5;
+  if (points >= 100) return 4;
+  if (points >= 50) return 3;
+  if (points >= 25) return 2;
+  return 1;
+}
 
 @Injectable()
 export class MatchesService {
   private readonly logger = new Logger(MatchesService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly achievementsService: AchievementsService,
+  ) {}
 
   async getMatches() {
     return this.prisma.match.findMany({
@@ -129,29 +146,93 @@ export class MatchesService {
     });
 
     for (const pred of predictions) {
-      const points = calculatePoints(
+      const basePoints = calculatePoints(
         pred.predictedHomeScore,
         pred.predictedAwayScore,
         actualHome,
         actualAway
       );
 
-      if (points > 0 && pred.pointsAwarded !== points) {
-        await this.prisma.prediction.update({
-          where: {
-            userId_matchId: { userId: pred.userId, matchId }
-          },
-          data: { pointsAwarded: points }
-        });
+      await this.prisma.prediction.update({
+        where: {
+          userId_matchId: { userId: pred.userId, matchId }
+        },
+        data: {
+          pointsAwarded: basePoints,
+          isExactScore: basePoints === 5,
+          isCorrectWinner: basePoints === 3 || basePoints === 2,
+          isCorrectDifference: basePoints === 2
+        }
+      });
 
-        const userPreds = await this.prisma.prediction.findMany({ where: { userId: pred.userId } });
-        const total = userPreds.reduce((sum, p) => sum + (p.pointsAwarded || 0), 0);
-        
-        await this.prisma.user.update({
-          where: { id: pred.userId },
-          data: { totalPoints: total }
-        });
+      await this.recalculateUserStats(pred.userId);
+    }
+  }
+
+  async recalculateUserStats(userId: string) {
+    const finishedMatches = await this.prisma.match.findMany({
+      where: { status: 'FINISHED' },
+      orderBy: { kickoffTime: 'asc' }
+    });
+
+    const userPreds = await this.prisma.prediction.findMany({
+      where: { userId }
+    });
+    const userPredsMap = new Map(userPreds.map(p => [p.matchId, p]));
+
+    let currentStreak = 0;
+    let maxStreak = 0;
+    let streakBonusPoints = 0;
+    let basePointsTotal = 0;
+    let earlyBonusPoints = 0;
+    let correctPredictionsCount = 0;
+
+    for (const match of finishedMatches) {
+      const pred = userPredsMap.get(match.id);
+      if (pred) {
+        const isCorrect = pred.pointsAwarded > 0;
+        if (isCorrect) {
+          currentStreak++;
+          if (currentStreak > maxStreak) {
+            maxStreak = currentStreak;
+          }
+          if (currentStreak > 0 && currentStreak % 3 === 0) {
+            streakBonusPoints += 2;
+          }
+          correctPredictionsCount++;
+        } else {
+          currentStreak = 0;
+        }
+        basePointsTotal += pred.pointsAwarded;
+        if (pred.earlyBonusAwarded) {
+          earlyBonusPoints += 1;
+        }
+      } else {
+        currentStreak = 0;
       }
     }
+
+    const totalPredictionsCount = userPreds.length;
+    const accuracyRate = totalPredictionsCount > 0 
+      ? (correctPredictionsCount / totalPredictionsCount) * 100 
+      : 0;
+    
+    const totalPoints = basePointsTotal + earlyBonusPoints + streakBonusPoints;
+    const level = getLevel(totalPoints);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        totalPoints,
+        accuracyRate,
+        currentStreak,
+        maxStreak,
+        level,
+        totalPredictions: totalPredictionsCount,
+        correctPredictions: correctPredictionsCount
+      }
+    });
+
+    await this.achievementsService.checkAndUnlockAchievements(userId);
   }
 }

@@ -103,3 +103,9 @@ h1, h2, h3, h4, h5, h6 {
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+

@@ -37,6 +37,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard/rooms" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Salas
           </Link>
+          <Link href="/dashboard/notifications" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+            Notificaciones
+          </Link>
         </nav>
 
         <div style={{ padding: '24px' }}>

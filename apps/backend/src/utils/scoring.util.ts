@@ -14,20 +14,32 @@ export function calculatePoints(
 ): number {
   // 1. Exact match
   if (predictedHome === actualHome && predictedAway === actualAway) {
-    return 3;
+    return 5;
   }
 
   // 2. Determine outcomes
   const predictedOutcome = getOutcome(predictedHome, predictedAway);
   const actualOutcome = getOutcome(actualHome, actualAway);
 
-  // 3. Correct outcome
-  if (predictedOutcome === actualOutcome) {
-    return 1;
+  // 3. Incorrect outcome
+  if (predictedOutcome !== actualOutcome) {
+    return 0;
   }
 
-  // 4. Incorrect outcome
-  return 0;
+  // 4. Draw outcome (but not exact)
+  if (predictedOutcome === 'DRAW') {
+    return 3;
+  }
+
+  // 5. Home Win / Away Win
+  const predictedDiff = predictedHome - predictedAway;
+  const actualDiff = actualHome - actualAway;
+
+  if (predictedDiff === actualDiff) {
+    return 2; // Correct Difference
+  }
+
+  return 3; // Correct Winner
 }
 
 /**
