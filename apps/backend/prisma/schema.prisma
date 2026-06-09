@@ -1,0 +1,303 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  CANCELLED
+  POSTPONED
+}
+
+enum NotificationType {
+  MATCH_REMINDER
+  RANKING_UPDATE
+  ACHIEVEMENT_UNLOCKED
+  SYSTEM
+}
+
+enum ActivityType {
+  PREDICTION_CREATED
+  ACHIEVEMENT_UNLOCKED
+  RANKING_UP
+  ROOM_JOINED
+  STREAK_REACHED
+}
+
+model User {
+  id                  String    @id @default(uuid()) @db.Uuid
+  email               String    @unique @db.VarChar(255)
+  fullName            String?   @map("full_name") @db.VarChar(150)
+  profileImageUrl     String?   @map("profile_image_url") @db.Text
+  career              String?   @db.VarChar(100)
+  course              String?   @db.VarChar(100)
+  role                UserRole  @default(USER)
+  totalPoints         Int       @default(0) @map("total_points")
+  totalPredictions    Int       @default(0) @map("total_predictions")
+  correctPredictions  Int       @default(0) @map("correct_predictions")
+  accuracyRate        Decimal   @default(0.00) @db.Decimal(5,2) @map("accuracy_rate")
+  currentStreak       Int       @default(0) @map("current_streak")
+  maxStreak           Int       @default(0) @map("max_streak")
+  favoriteRoomId      String?   @map("favorite_room_id") @db.Uuid
+  favoriteRoom        Room?     @relation("UserFavoriteRoom", fields: [favoriteRoomId], references: [id])
+  level               Int       @default(1)
+  isActive            Boolean   @default(true) @map("is_active")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  sessions             UserSession[]
+  predictions          Prediction[]
+  ownedRooms           Room[]             @relation("RoomOwner")
+  roomMemberships      RoomMember[]
+  notifications        Notification[]
+  activities           ActivityLog[]
+  userAchievements     UserAchievement[]
+  rankingSnapshots     RankingSnapshot[]
+  chatbotConversations ChatbotConversation[]
+
+  @@index([email])
+  @@index([totalPoints(sort: Desc)])
+  @@index([career])
+  @@index([course])
+  @@map("users")
+}
+
+model UserSession {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  refreshToken String   @map("refresh_token") @db.Text
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model OtpCode {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @db.VarChar(255)
+  otpCode   String   @map("otp_code") @db.VarChar(10)
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("otp_codes")
+}
+
+model Team {
+  id         String   @id @default(uuid()) @db.Uuid
+  apiTeamId  Int      @unique @map("api_team_id")
+  name       String   @db.VarChar(100)
+  shortName  String?  @map("short_name") @db.VarChar(50)
+  logoUrl    String?  @map("logo_url") @db.Text
+  country    String?  @db.VarChar(100)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  homeMatches Match[] @relation("HomeMatches")
+  awayMatches Match[] @relation("AwayMatches")
+
+  @@map("teams")
+}
+
+model Tournament {
+  id              String   @id @default(uuid()) @db.Uuid
+  apiTournamentId Int      @map("api_tournament_id")
+  name            String   @db.VarChar(150)
+  logoUrl         String?  @map("logo_url") @db.Text
+  season          String?  @db.VarChar(20)
+  startDate       DateTime @map("start_date") @db.Date
+  endDate         DateTime @map("end_date") @db.Date
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  matches Match[]
+
+  @@map("tournaments")
+}
+
+model Match {
+  id                 String      @id @default(uuid()) @db.Uuid
+  apiMatchId         Int         @unique @map("api_match_id")
+  tournamentId       String      @map("tournament_id") @db.Uuid
+  homeTeamId         String      @map("home_team_id") @db.Uuid
+  awayTeamId         String      @map("away_team_id") @db.Uuid
+  kickoffTime        DateTime    @map("kickoff_time")
+  status             MatchStatus @default(SCHEDULED)
+  homeScore          Int?        @map("home_score")
+  awayScore          Int?        @map("away_score")
+  predictionDeadline DateTime    @map("prediction_deadline")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  homeTeam   Team       @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  awayTeam   Team       @relation("AwayMatches", fields: [awayTeamId], references: [id])
+
+  predictions          Prediction[]
+  collectivePredictions CollectivePrediction?
+
+  @@index([kickoffTime])
+  @@index([status])
+  @@index([predictionDeadline])
+  @@map("matches")
+}
+
+model Prediction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  matchId             String   @map("match_id") @db.Uuid
+  predictedHomeScore  Int      @map("predicted_home_score")
+  predictedAwayScore  Int      @map("predicted_away_score")
+  pointsAwarded       Int      @default(0) @map("points_awarded")
+  isExactScore        Boolean  @default(false) @map("is_exact_score")
+  isCorrectWinner     Boolean  @default(false) @map("is_correct_winner")
+  isCorrectDifference Boolean  @default(false) @map("is_correct_difference")
+  earlyBonusAwarded   Boolean  @default(false) @map("early_bonus_awarded")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, matchId])
+  @@map("predictions")
+}
+
+model Room {
+  id          String   @id @default(uuid()) @db.Uuid
+  ownerId     String   @map("owner_id") @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  inviteCode  String   @unique @map("invite_code") @db.VarChar(20)
+  imageUrl    String?  @map("image_url") @db.Text
+  maxMembers  Int      @default(50) @map("max_members")
+  isAcademic  Boolean  @default(false) @map("is_academic")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  owner             User         @relation("RoomOwner", fields: [ownerId], references: [id])
+  members           RoomMember[]
+  favoritedBy       User[]       @relation("UserFavoriteRoom")
+
+  @@map("rooms")
+}
+
+model RoomMember {
+  roomId   String   @map("room_id") @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@map("room_members")
+}
+
+model Achievement {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String   @db.VarChar(100)
+  description   String?  @db.Text
+  iconUrl       String?  @map("icon_url") @db.Text
+  frameUrl      String?  @map("frame_url") @db.Text
+  requiredValue Int      @map("required_value")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        String   @map("user_id") @db.Uuid
+  achievementId String   @map("achievement_id") @db.Uuid
+  unlockedAt    DateTime @default(now()) @map("unlocked_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model Notification {
+  id               String           @id @default(uuid()) @db.Uuid
+  userId           String           @map("user_id") @db.Uuid
+  title            String           @db.VarChar(200)
+  message          String           @db.Text
+  notificationType NotificationType @map("notification_type")
+  isRead           Boolean          @default(false) @map("is_read")
+  createdAt        DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  activityType ActivityType @map("activity_type")
+  title        String       @db.VarChar(200)
+  description  String?      @db.Text
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+model RankingSnapshot {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  rankingPosition Int      @map("ranking_position")
+  points          Int
+  snapshotDate    DateTime @map("snapshot_date") @db.Date
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ranking_snapshots")
+}
+
+model CollectivePrediction {
+  id                String   @id @default(uuid()) @db.Uuid
+  matchId           String   @unique @map("match_id") @db.Uuid
+  homeWinPercentage Decimal  @map("home_win_percentage") @db.Decimal(5,2)
+  drawPercentage    Decimal  @map("draw_percentage") @db.Decimal(5,2)
+  awayWinPercentage Decimal  @map("away_win_percentage") @db.Decimal(5,2)
+  calculatedAt      DateTime @default(now()) @map("calculated_at")
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("collective_predictions")
+}
+
+model AiSummary {
+  id          String   @id @default(uuid()) @db.Uuid
+  summaryType String   @map("summary_type") @db.VarChar(50)
+  content     String   @db.Text
+  generatedAt DateTime @default(now()) @map("generated_at")
+
+  @@map("ai_summaries")
+}
+
+model ChatbotConversation {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  question  String   @db.Text
+  response  String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chatbot_conversations")
+}
