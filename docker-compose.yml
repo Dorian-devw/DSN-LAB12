@@ -4,8 +4,8 @@ services:
     image: postgres:16-alpine
     container_name: goleate-postgres
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: dorianless
       POSTGRES_DB: goleate
     ports:
       - "5432:5432"
@@ -33,7 +33,7 @@ services:
       - postgres
       - redis
     environment:
-      - DATABASE_URL=postgresql://root:rootpassword@postgres:5432/goleate?schema=public
+      - DATABASE_URL=postgresql://postgres:dorianless@postgres:5432/goleate?schema=public
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=super_secret_goleate_key_2026

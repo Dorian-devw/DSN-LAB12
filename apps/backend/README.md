@@ -1,98 +1,118 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ⚙️ GOLEATE! - Backend & Core API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+GOLEATE! Backend es el motor principal y la capa de lógica de negocio detrás de la plataforma de predicciones deportivas de TECSUP.
+Construido bajo una arquitectura hexagonal impulsada por NestJS, este servicio provee una API RESTful robusta, conexiones WebSockets en tiempo real y procesos automatizados (Cron Jobs) para el cálculo masivo de puntajes.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## ✨ Características Principales (Features)
 
-## Project setup
+*   **🔒 Auth & Seguridad:** Validación estricta con dominios `@tecsup.edu.pe`, autenticación OTP por email (Brevo) y protección mediante JSON Web Tokens (JWT).
+*   **⚽ Sincronización Automática (Cron):** Integración con `API-Football` para descargar partidos de la Copa Mundial de la FIFA automáticamente.
+*   **🧮 Motor de Puntajes:** Sistema matemático automatizado que reparte puntos (3 puntos por exactitud, 1 punto por tendencia) tan pronto finaliza un partido en el mundo real.
+*   **🤖 Integración de Inteligencia Artificial:** Conexión con `Groq API` (Llama 3) para generar análisis deportivos, chatbots predictivos y resúmenes de rendimiento.
+*   **📡 WebSockets:** Notificaciones Push en tiempo real para eventos dentro del ecosistema (partidos en vivo, logros desbloqueados).
+*   **📦 Alta Disponibilidad:** Optimizado para la nube, utilizando Redis para cachés veloces y PostgreSQL como única fuente de verdad.
 
-```bash
-$ npm install
+---
+
+## 🏗️ Arquitectura y Tecnologías
+
+El Backend sigue estrictamente los principios SOLID y la inyección de dependencias modular:
+
+*   **Framework:** [NestJS](https://nestjs.com/) (Express under the hood)
+*   **ORM:** [Prisma](https://www.prisma.io/) (Typesafe Database Client)
+*   **Base de Datos:** PostgreSQL
+*   **Caché y Eventos:** Redis
+*   **Despliegue:** Imagen Docker lista para Amazon ECS o Docker Hub.
+
+---
+
+## 📁 Estructura del Proyecto
+
+```text
+apps/backend/
+├── Dockerfile                  # Receta para construir la imagen (Docker Hub/AWS)
+├── prisma/
+│   ├── schema.prisma           # Esquema de la base de datos (Modelos y Relaciones)
+│   └── migrations/             # Historial de migraciones SQL
+├── src/
+│   ├── auth/                   # Módulo de Autenticación, JWT, Guardias y Brevo
+│   ├── users/                  # Gestión de perfiles, puntos totales y avatares
+│   ├── matches/                # Sincronización API-Football y Cron Jobs
+│   ├── predictions/            # CRUD de predicciones de los estudiantes
+│   ├── rankings/               # Cálculo matemático de las tablas de clasificación
+│   ├── rooms/                  # Lógica de Salas Privadas y códigos de acceso
+│   ├── achievements/           # Sistema de Gamificación (Insignias/Marcos)
+│   ├── ai/                     # Integración con LLMs (Groq)
+│   ├── notifications/          # WebSockets y Push Notifications
+│   ├── prisma/                 # Servicio de conexión a base de datos
+│   └── utils/                  # Herramientas matemáticas (scoring.util.ts)
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## ⚙️ Variables de Entorno
 
-# watch mode
-$ npm run start:dev
+Para levantar este servidor, asegúrate de tener el archivo `.env` configurado:
 
-# production mode
-$ npm run start:prod
+```env
+# Conexión a Base de Datos
+DATABASE_URL=postgresql://root:rootpassword@localhost:5432/goleate?schema=public
+
+# Conexión a Caché
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Seguridad
+JWT_SECRET=super_secret_goleate_key_2026
+
+# APIs Externas
+API_FOOTBALL_KEY=tu_api_key_de_football
+SENDGRID_API_KEY=tu_api_key_de_brevo_o_sendgrid
+GROQ_API_KEY=tu_api_key_de_groq
 ```
 
-## Run tests
+---
 
+## 🐳 Despliegue e Imágenes Docker
+
+Esta aplicación ha sido diseñada como un microservicio "Stateless", lo que la hace perfecta para contenedores.
+
+**Para descargar/usar desde Docker Hub:**
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker pull dorian778/goleate-backend:latest
+docker run -p 3000:3000 --env-file .env dorian778/goleate-backend:latest
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+**Para construir la imagen localmente (Build):**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker build -t goleate-backend -f apps/backend/Dockerfile .
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 🛠️ Comandos de Desarrollo (Local)
 
-Check out a few resources that may come in handy when working with NestJS:
+1.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
+2.  **Generar Tipos de Prisma:**
+    ```bash
+    npx prisma generate --schema=apps/backend/prisma/schema.prisma
+    ```
+3.  **Iniciar Servidor en Modo Watch:**
+    ```bash
+    npm run dev:backend
+    ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+> **Ingeniería robusta y de alto rendimiento. Arquitecturado para soportar miles de conexiones simultáneas durante los partidos del mundial.**
