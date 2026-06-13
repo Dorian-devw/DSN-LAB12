@@ -131,3 +131,7 @@ dist
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+
+# Secrets and local output files
+terraform-texto-aws.txt
+football_data_out.json

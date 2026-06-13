@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchApi } from '../../../../lib/api';
 
-export default function MatchPredictionPage({ params }: { params: { id: string } }) {
+export default function MatchPredictionPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
   const [match, setMatch] = useState<any>(null);
   const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -18,12 +19,12 @@ export default function MatchPredictionPage({ params }: { params: { id: string }
   useEffect(() => {
     async function loadMatch() {
       try {
-        const data = await fetchApi(`/matches/${params.id}`);
+        const data = await fetchApi(`/matches/${id}`);
         setMatch(data);
         
         // Fetch AI Insight
         try {
-          const aiData = await fetchApi(`/ai/insights/${params.id}`);
+          const aiData = await fetchApi(`/ai/insights/${id}`);
           if (aiData?.insight) {
             setInsight(aiData.insight);
           }
@@ -38,7 +39,7 @@ export default function MatchPredictionPage({ params }: { params: { id: string }
       }
     }
     loadMatch();
-  }, [params.id, router]);
+  }, [id, router]);
 
   const handlePredict = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +48,7 @@ export default function MatchPredictionPage({ params }: { params: { id: string }
     setSaving(true);
     setMessage('');
     try {
-      await fetchApi(`/predictions/${params.id}`, {
+      await fetchApi(`/predictions/${id}`, {
         method: 'POST',
         body: JSON.stringify({
           predictedHomeScore: Number(homeScore),

@@ -18,7 +18,7 @@ export default function Home() {
     setLoading(true);
     setError('');
     try {
-      await fetchApi('/auth/request-otp', {
+      await fetchApi('/auth/otp/send', {
         method: 'POST',
         body: JSON.stringify({ email }),
       });
@@ -35,9 +35,9 @@ export default function Home() {
     setLoading(true);
     setError('');
     try {
-      const data = await fetchApi('/auth/verify-otp', {
+      const data = await fetchApi('/auth/otp/verify', {
         method: 'POST',
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, otpCode: otp }),
       });
       localStorage.setItem('goleate_token', data.accessToken);
       router.push('/dashboard');

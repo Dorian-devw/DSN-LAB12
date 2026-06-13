@@ -21,7 +21,7 @@ export default function RoomsPage() {
   const loadRooms = async () => {
     setLoading(true);
     try {
-      const data = await fetchApi('/rooms/me');
+      const data = await fetchApi('/rooms');
       setRooms(data);
     } catch (err) {
       console.error('Error al cargar salas', err);

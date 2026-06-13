@@ -42,11 +42,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
         </nav>
 
-        <div style={{ padding: '24px' }}>
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="glass-panel" style={{ padding: '16px', textAlign: 'center' }}>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '8px' }}>Puntos Totales</p>
             <h3 style={{ color: 'var(--accent-secondary)', fontSize: '2rem' }}>{user?.totalPoints || 0}</h3>
           </div>
+          
+          <button 
+            onClick={() => {
+              localStorage.removeItem('goleate_token');
+              window.location.href = '/';
+            }}
+            style={{
+              padding: '12px',
+              borderRadius: '12px',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'rgba(239, 68, 68, 0.1)',
+              color: '#ef4444',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+          >
+            Cerrar Sesión
+          </button>
         </div>
       </aside>
 

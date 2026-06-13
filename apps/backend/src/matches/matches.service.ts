@@ -42,24 +42,24 @@ export class MatchesService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async syncMatches() {
-    this.logger.log('Starting automated Match Sync from API-Football...');
+    this.logger.log('Starting automated Match Sync from football-data.org...');
     
-    const apiKey = process.env.API_FOOTBALL_KEY;
+    const apiKey = process.env.FOOTBALL_DATA_API_KEY;
     if (!apiKey) {
-      this.logger.error('API_FOOTBALL_KEY is missing');
+      this.logger.error('FOOTBALL_DATA_API_KEY is missing');
       return { success: false, message: 'API Key missing' };
     }
 
     try {
-      // League ID 1 in API-Football corresponds to the FIFA World Cup
-      const response = await fetch('https://v3.football.api-sports.io/fixtures?league=1&season=2026', {
-        headers: { 'x-apisports-key': apiKey }
+      // Competition WC in football-data.org corresponds to the FIFA World Cup
+      const response = await fetch('https://api.football-data.org/v4/competitions/WC/matches', {
+        headers: { 'X-Auth-Token': apiKey }
       });
       
       const data = await response.json();
       
-      if (!data.response || data.response.length === 0) {
-        this.logger.warn('No matches found from API-Football for FIFA World Cup');
+      if (!data.matches || data.matches.length === 0) {
+        this.logger.warn('No matches found from football-data.org for FIFA World Cup');
         return { success: true, count: 0 };
       }
 
@@ -81,46 +81,53 @@ export class MatchesService {
         });
       }
       
-      for (const fixture of data.response) {
+      for (const matchData of data.matches) {
+        if (!matchData.homeTeam?.id || !matchData.awayTeam?.id) {
+          continue;
+        }
+
         // Upsert Teams
         await this.prisma.team.upsert({
-          where: { apiTeamId: fixture.teams.home.id },
-          update: { name: fixture.teams.home.name, logoUrl: fixture.teams.home.logo },
-          create: { apiTeamId: fixture.teams.home.id, name: fixture.teams.home.name, logoUrl: fixture.teams.home.logo }
+          where: { apiTeamId: matchData.homeTeam.id },
+          update: { name: matchData.homeTeam.name, logoUrl: matchData.homeTeam.crest },
+          create: { apiTeamId: matchData.homeTeam.id, name: matchData.homeTeam.name, logoUrl: matchData.homeTeam.crest }
         });
         
         await this.prisma.team.upsert({
-          where: { apiTeamId: fixture.teams.away.id },
-          update: { name: fixture.teams.away.name, logoUrl: fixture.teams.away.logo },
-          create: { apiTeamId: fixture.teams.away.id, name: fixture.teams.away.name, logoUrl: fixture.teams.away.logo }
+          where: { apiTeamId: matchData.awayTeam.id },
+          update: { name: matchData.awayTeam.name, logoUrl: matchData.awayTeam.crest },
+          create: { apiTeamId: matchData.awayTeam.id, name: matchData.awayTeam.name, logoUrl: matchData.awayTeam.crest }
         });
 
-        const hTeam = await this.prisma.team.findUnique({ where: { apiTeamId: fixture.teams.home.id } });
-        const aTeam = await this.prisma.team.findUnique({ where: { apiTeamId: fixture.teams.away.id } });
+        const hTeam = await this.prisma.team.findUnique({ where: { apiTeamId: matchData.homeTeam.id } });
+        const aTeam = await this.prisma.team.findUnique({ where: { apiTeamId: matchData.awayTeam.id } });
 
         if(!hTeam || !aTeam) continue;
 
         let status: any = 'SCHEDULED';
-        if (fixture.fixture.status.short === 'FT') status = 'FINISHED';
-        else if (['1H', '2H', 'HT'].includes(fixture.fixture.status.short)) status = 'IN_PROGRESS';
+        if (matchData.status === 'FINISHED') status = 'FINISHED';
+        else if (['IN_PLAY', 'PAUSED', 'LIVE'].includes(matchData.status)) status = 'IN_PROGRESS';
+
+        const homeScore = matchData.score?.fullTime?.home ?? null;
+        const awayScore = matchData.score?.fullTime?.away ?? null;
 
         const match = await this.prisma.match.upsert({
-          where: { apiMatchId: fixture.fixture.id },
+          where: { apiMatchId: matchData.id },
           update: {
             status,
-            homeScore: fixture.goals.home,
-            awayScore: fixture.goals.away,
+            homeScore,
+            awayScore,
           },
           create: {
-            apiMatchId: fixture.fixture.id,
+            apiMatchId: matchData.id,
             tournamentId: tournamentId,
             homeTeamId: hTeam.id,
             awayTeamId: aTeam.id,
-            kickoffTime: new Date(fixture.fixture.date),
-            predictionDeadline: new Date(new Date(fixture.fixture.date).getTime() - 15 * 60000), // 15 mins before
+            kickoffTime: new Date(matchData.utcDate),
+            predictionDeadline: new Date(new Date(matchData.utcDate).getTime() - 15 * 60000), // 15 mins before
             status,
-            homeScore: fixture.goals.home,
-            awayScore: fixture.goals.away,
+            homeScore,
+            awayScore,
           }
         });
 

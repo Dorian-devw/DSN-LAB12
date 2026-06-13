@@ -88,8 +88,11 @@ export default function MatchesPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
-          <div style={{ flex: 1, textAlign: 'right', paddingRight: '16px' }}>
-            <h3 style={{ fontSize: '1.25rem', color: '#fff' }}>{match.homeTeam?.name || 'Local'}</h3>
+          <div style={{ flex: 1, textAlign: 'right', paddingRight: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#fff', margin: 0 }}>{match.homeTeam?.name || 'Local'}</h3>
+            {match.homeTeam?.logoUrl && (
+              <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -104,8 +107,11 @@ export default function MatchesPage() {
             )}
           </div>
           
-          <div style={{ flex: 1, textAlign: 'left', paddingLeft: '16px' }}>
-            <h3 style={{ fontSize: '1.25rem', color: '#fff' }}>{match.awayTeam?.name || 'Visitante'}</h3>
+          <div style={{ flex: 1, textAlign: 'left', paddingLeft: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {match.awayTeam?.logoUrl && (
+              <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            )}
+            <h3 style={{ fontSize: '1.25rem', color: '#fff', margin: 0 }}>{match.awayTeam?.name || 'Visitante'}</h3>
           </div>
         </div>
 
