@@ -30,6 +30,8 @@ export default function Home() {
     }
   };
 
+  const [fullName, setFullName] = useState('');
+
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -40,10 +42,37 @@ export default function Home() {
         body: JSON.stringify({ email, otpCode: otp }),
       });
       localStorage.setItem('goleate_token', data.accessToken);
-      router.push('/dashboard');
+      
+      // Check if user has full name
+      try {
+        const user = await fetchApi('/users/me');
+        if (!user.fullName) {
+          setStep(3);
+        } else {
+          router.push('/dashboard');
+        }
+      } catch (e) {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.message || 'OTP incorrecto o expirado.');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      await fetchApi('/users/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ fullName }),
+      });
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Error al guardar el nombre.');
       setLoading(false);
     }
   };
@@ -131,7 +160,7 @@ export default function Home() {
                   {loading ? 'Enviando...' : 'Recibir Código OTP'}
                 </button>
               </form>
-            ) : (
+            ) : step === 2 ? (
               <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <p style={{ color: 'var(--accent-primary)', fontSize: '0.9rem', textAlign: 'center' }}>Código enviado a {email}</p>
                 <div>
@@ -148,6 +177,24 @@ export default function Home() {
                 </div>
                 <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? 'Verificando...' : 'Verificar y Entrar'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleSaveName} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <p style={{ color: 'var(--accent-primary)', fontSize: '0.9rem', textAlign: 'center' }}>¡Código verificado con éxito!</p>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Ingresa tu Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ej. Juan Pérez"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)', color: '#fff', fontSize: '1.1rem', textAlign: 'center' }}
+                  />
+                </div>
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  {loading ? 'Guardando...' : 'Guardar y Continuar'}
                 </button>
               </form>
             )}

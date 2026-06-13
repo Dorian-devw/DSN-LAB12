@@ -6,6 +6,7 @@ import { fetchApi } from '../../lib/api';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchApi('/users/me')
@@ -14,30 +15,60 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+    <div className="dashboard-layout">
+      {/* Mobile Nav Toggle */}
+      <button 
+        className="mobile-nav-toggle"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle Navigation"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {isMobileMenuOpen ? (
+            <>
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </>
+          ) : (
+            <>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </>
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile Nav Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-nav-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="glass-panel" style={{ width: '280px', margin: '16px', display: 'flex', flexDirection: 'column', borderRadius: '24px' }}>
+      <aside className={`glass-panel desktop-sidebar ${isMobileMenuOpen ? 'mobile-sidebar-active' : ''}`}>
         <div style={{ padding: '32px 24px' }}>
           <h2 style={{ color: 'var(--accent-primary)', margin: 0, fontSize: '1.75rem' }}>GOLEATE!</h2>
         </div>
         
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 16px', flex: 1 }}>
-          <Link href="/dashboard" style={{ color: 'var(--text-primary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-glass-hover)' }}>
+          <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px', background: 'var(--bg-glass-hover)' }}>
             Resumen
           </Link>
-          <Link href="/dashboard/matches" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+          <Link href="/dashboard/matches" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Partidos
           </Link>
-          <Link href="/dashboard/predictions" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+          <Link href="/dashboard/predictions" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Mis Predicciones
           </Link>
-          <Link href="/dashboard/rankings" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+          <Link href="/dashboard/rankings" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Rankings
           </Link>
-          <Link href="/dashboard/rooms" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+          <Link href="/dashboard/rooms" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Salas
           </Link>
-          <Link href="/dashboard/notifications" style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
+          <Link href="/dashboard/notifications" onClick={() => setIsMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', textDecoration: 'none', padding: '12px 16px', borderRadius: '12px' }}>
             Notificaciones
           </Link>
         </nav>
@@ -72,7 +103,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+      <main className="dashboard-main">
         {children}
       </main>
     </div>

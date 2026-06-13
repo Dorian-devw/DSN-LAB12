@@ -87,14 +87,17 @@ export default function PredictionsPage() {
         </div>
 
         {/* Match Row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
-          <div style={{ flex: 1, textAlign: 'right', paddingRight: '12px' }}>
-            <h4 style={{ fontSize: '1.1rem', color: '#fff' }}>{match.homeTeam?.name || 'Local'}</h4>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', gap: '8px' }}>
+          <div style={{ flex: 1, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', minWidth: 0 }}>
+            <h3 style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.2rem)', color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={match.homeTeam?.name}>{match.homeTeam?.name || 'Local'}</h3>
+            {match.homeTeam?.logoUrl && (
+              <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
+            )}
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '80px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, gap: '4px' }}>
             {match.status === 'FINISHED' || match.status === 'LIVE' || match.status === 'IN_PROGRESS' ? (
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '2px', color: 'var(--text-primary)' }}>
                 {match.homeScore} - {match.awayScore}
               </div>
             ) : (
@@ -102,13 +105,16 @@ export default function PredictionsPage() {
                 VS
               </div>
             )}
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               Resultado Real
             </span>
           </div>
-
-          <div style={{ flex: 1, textAlign: 'left', paddingLeft: '12px' }}>
-            <h4 style={{ fontSize: '1.1rem', color: '#fff' }}>{match.awayTeam?.name || 'Visitante'}</h4>
+          
+          <div style={{ flex: 1, textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            {match.awayTeam?.logoUrl && (
+              <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
+            )}
+            <h3 style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.2rem)', color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={match.awayTeam?.name}>{match.awayTeam?.name || 'Visitante'}</h3>
           </div>
         </div>
 
@@ -124,7 +130,7 @@ export default function PredictionsPage() {
         }}>
           <div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Tu Predicción</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-primary)' }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-primary)', letterSpacing: '2px' }}>
               {pred.predictedHomeScore} - {pred.predictedAwayScore}
             </div>
           </div>
@@ -139,19 +145,10 @@ export default function PredictionsPage() {
               </div>
             ) : (
               <div>
-                {deadlinePassed ? (
-                  <span style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                    Bloqueado
-                  </span>
-                ) : (
-                  <button 
-                    className="btn-primary" 
-                    style={{ padding: '6px 12px', fontSize: '0.75rem' }}
-                    onClick={() => router.push(`/dashboard/matches/${match.id}`)}
-                  >
-                    Editar
-                  </button>
-                )}
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  No modificable
+                </span>
               </div>
             )}
           </div>
@@ -207,7 +204,7 @@ export default function PredictionsPage() {
         {activePredictions.length === 0 ? (
           <p style={{ color: 'var(--text-secondary)' }}>No tienes predicciones activas para próximos partidos.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {activePredictions.map(renderPredictionCard)}
           </div>
         )}
@@ -219,7 +216,7 @@ export default function PredictionsPage() {
         {pastPredictions.length === 0 ? (
           <p style={{ color: 'var(--text-secondary)' }}>No tienes predicciones en partidos finalizados.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {pastPredictions.map(renderPredictionCard)}
           </div>
         )}

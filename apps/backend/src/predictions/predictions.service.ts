@@ -16,19 +16,18 @@ export class PredictionsService {
 
     const isEarly = (match.kickoffTime.getTime() - new Date().getTime()) > 24 * 60 * 60 * 1000;
 
-    return this.prisma.prediction.upsert({
+    const existing = await this.prisma.prediction.findUnique({
       where: {
-        userId_matchId: {
-          userId,
-          matchId,
-        }
-      },
-      update: {
-        predictedHomeScore: dto.predictedHomeScore,
-        predictedAwayScore: dto.predictedAwayScore,
-        earlyBonusAwarded: isEarly,
-      },
-      create: {
+        userId_matchId: { userId, matchId }
+      }
+    });
+
+    if (existing) {
+      throw new BadRequestException('Ya tienes una predicción guardada para este partido. No es posible modificarla.');
+    }
+
+    return this.prisma.prediction.create({
+      data: {
         userId,
         matchId,
         predictedHomeScore: dto.predictedHomeScore,

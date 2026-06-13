@@ -141,24 +141,37 @@ export default function DashboardOverview() {
             <p style={{ color: 'var(--text-secondary)' }}>No hay partidos programados próximamente.</p>
           ) : (
             topMatches.map((match) => (
-              <div key={match.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flex: 1 }}>
-                  <div style={{ textAlign: 'right', flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem' }}>{match.homeTeam?.name || 'Local'}</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Local</p>
+              <div key={match.id} className="glass-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'clamp(16px, 3vw, 24px)', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 24px)', flex: '1 1 250px' }}>
+                  <div style={{ textAlign: 'right', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', minWidth: 0 }}>
+                    <div>
+                      <h3 style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{match.homeTeam?.name || 'Local'}</h3>
+                      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>Local</p>
+                    </div>
+                    {match.homeTeam?.logoUrl && (
+                      <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} style={{ width: 'clamp(32px, 5vw, 40px)', height: 'clamp(32px, 5vw, 40px)', objectFit: 'contain', flexShrink: 0 }} />
+                    )}
                   </div>
-                  <div style={{ padding: '8px 16px', background: 'var(--bg-secondary)', borderRadius: '8px', fontWeight: 'bold' }}>
+                  
+                  <div style={{ padding: '6px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontWeight: 'bold', flexShrink: 0, border: '1px solid var(--border-subtle)', fontSize: '0.9rem' }}>
                     VS
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.25rem' }}>{match.awayTeam?.name || 'Visitante'}</h3>
-                    <p style={{ color: 'var(--text-secondary)' }}>Visitante</p>
+                  
+                  <div style={{ flex: 1, textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    {match.awayTeam?.logoUrl && (
+                      <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} style={{ width: 'clamp(32px, 5vw, 40px)', height: 'clamp(32px, 5vw, 40px)', objectFit: 'contain', flexShrink: 0 }} />
+                    )}
+                    <div>
+                      <h3 style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{match.awayTeam?.name || 'Visitante'}</h3>
+                      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>Visitante</p>
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '16px', marginLeft: '48px' }}>
+                
+                <div style={{ display: 'flex', flex: '0 0 auto', marginLeft: 'auto', marginRight: 'auto', flexShrink: 0 }}>
                   <button 
                     className="btn-primary" 
-                    style={{ padding: '8px 16px', fontSize: '0.875rem' }} 
+                    style={{ padding: '8px 24px', fontSize: '0.875rem', letterSpacing: '1px', textTransform: 'uppercase', width: '100%' }} 
                     onClick={() => router.push(`/dashboard/matches/${match.id}`)}
                   >
                     Predecir

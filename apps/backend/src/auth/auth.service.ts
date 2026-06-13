@@ -144,7 +144,7 @@ export class AuthService {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'GOLEATE!', email: 'noreply@goleate.com' },
+          sender: { name: 'GOLEATE!', email: 'tears.lambda@gmail.com' },
           to: [{ email: to }],
           subject: 'Your GOLEATE! Login Code',
           htmlContent: `<html><body><h1>Your OTP Code</h1><p>Your login code is <strong>${otp}</strong>. It expires in 10 minutes.</p></body></html>`,

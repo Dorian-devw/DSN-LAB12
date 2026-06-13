@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AiService {
   private readonly logger = new Logger(AiService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async generateMatchInsight(matchId: string) {
     const match = await this.prisma.match.findUnique({
@@ -14,6 +14,16 @@ export class AiService {
     });
 
     if (!match) return null;
+
+    const summaryType = `INSIGHT_${matchId}`;
+
+    const existingInsight = await this.prisma.aiSummary.findFirst({
+      where: { summaryType }
+    });
+
+    if (existingInsight) {
+      return { insight: existingInsight.content };
+    }
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
@@ -29,20 +39,35 @@ export class AiService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.3-70b-versatile',
           messages: [
-            { role: 'system', content: 'You are a sports analyst. Keep it under 2 sentences.' },
-            { role: 'user', content: `Give a brief pre-match analysis for ${match.homeTeam.name} vs ${match.awayTeam.name}.` }
+            { role: 'system', content: 'Eres un experto analista deportivo. Redacta un análisis previo al partido de forma detallada e interesante (máximo 4 oraciones completas). RESPONDE SIEMPRE EN ESPAÑOL.' },
+            { role: 'user', content: `Realiza un análisis táctico y pronóstico breve para el partido entre ${match.homeTeam.name} y ${match.awayTeam.name}.` }
           ]
         })
       });
 
       const data = await response.json();
-      const insight = data.choices[0]?.message?.content || 'No insight available.';
+
+      if (!response.ok || data.error) {
+        this.logger.error(`Groq API Error: ${JSON.stringify(data.error || data)}`);
+        return { insight: 'No hay análisis disponible por el momento.' };
+      }
+
+      const insight = data.choices?.[0]?.message?.content || 'No hay análisis disponible por el momento.';
+
+      if (insight !== 'No hay análisis disponible por el momento.') {
+        await this.prisma.aiSummary.create({
+          data: {
+            summaryType,
+            content: insight
+          }
+        });
+      }
 
       return { insight };
     } catch (e) {
-      this.logger.error('Groq API error:', e);
+      this.logger.error('Groq API catch error:', e);
       return null;
     }
   }

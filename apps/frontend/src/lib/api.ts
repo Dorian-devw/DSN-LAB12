@@ -19,7 +19,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || 'API request failed');
+    throw new Error(errorData.message || 'La petición al servidor falló');
   }
 
   // Not all endpoints return JSON, but most do

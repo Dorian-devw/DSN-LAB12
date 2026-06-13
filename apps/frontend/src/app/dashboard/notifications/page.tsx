@@ -34,7 +34,7 @@ export default function NotificationsPage() {
         prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
       );
     } catch (err) {
-      console.error('Failed to mark notification as read:', err);
+      console.error('Error al marcar la notificación como leída:', err);
     }
   };
 

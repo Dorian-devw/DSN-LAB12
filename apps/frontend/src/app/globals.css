@@ -109,3 +109,84 @@ h1, h2, h3, h4, h5, h6 {
   50% { opacity: 1; }
 }
 
+
+/* Responsive Dashboard Layout */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.desktop-sidebar {
+  width: 280px;
+  margin: 16px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+}
+
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.mobile-nav-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    padding: 80px 16px 32px 16px; /* Extra top padding for hamburger menu */
+  }
+
+  .desktop-sidebar {
+    display: none; /* Hide standard sidebar */
+  }
+
+  .mobile-nav-toggle {
+    display: block; /* Show hamburger button */
+  }
+
+  .mobile-sidebar-active {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    z-index: 999;
+    background: var(--bg-primary); /* Less transparent for readability */
+    border-right: 1px solid var(--border-subtle);
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-nav-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+  }
+}

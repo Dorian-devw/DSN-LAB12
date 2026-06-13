@@ -87,54 +87,60 @@ export default function MatchesPage() {
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' }}>
-          <div style={{ flex: 1, textAlign: 'right', paddingRight: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
-            <h3 style={{ fontSize: '1.25rem', color: '#fff', margin: 0 }}>{match.homeTeam?.name || 'Local'}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', gap: '8px' }}>
+          <div style={{ flex: 1, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', minWidth: 0 }}>
+            <h3 style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.2rem)', color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={match.homeTeam?.name}>{match.homeTeam?.name || 'Local'}</h3>
             {match.homeTeam?.logoUrl && (
-              <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+              <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
             )}
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             {match.status === 'FINISHED' || match.status === 'LIVE' || match.status === 'IN_PROGRESS' ? (
-              <div style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '4px', color: 'var(--accent-secondary)' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '2px', color: 'var(--accent-secondary)' }}>
                 {match.homeScore} - {match.awayScore}
               </div>
             ) : (
-              <div style={{ padding: '8px 16px', background: 'var(--bg-secondary)', borderRadius: '8px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
+              <div style={{ padding: '4px 8px', background: 'var(--bg-secondary)', borderRadius: '6px', fontWeight: 'bold', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                 VS
               </div>
             )}
           </div>
           
-          <div style={{ flex: 1, textAlign: 'left', paddingLeft: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ flex: 1, textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
             {match.awayTeam?.logoUrl && (
-              <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+              <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} style={{ width: '24px', height: '24px', objectFit: 'contain', flexShrink: 0 }} />
             )}
-            <h3 style={{ fontSize: '1.25rem', color: '#fff', margin: 0 }}>{match.awayTeam?.name || 'Visitante'}</h3>
+            <h3 style={{ fontSize: 'clamp(0.9rem, 2.5vw, 1.2rem)', color: '#fff', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={match.awayTeam?.name}>{match.awayTeam?.name || 'Visitante'}</h3>
           </div>
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             {userPrediction ? (
-              <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+              <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Tu predicción: <strong style={{ color: 'var(--accent-primary)' }}>{userPrediction.predictedHomeScore} - {userPrediction.predictedAwayScore}</strong>
                 {match.status === 'FINISHED' && (
-                  <span style={{ marginLeft: '12px', color: 'var(--accent-secondary)', fontWeight: 'bold' }}>
+                  <span style={{ marginLeft: '8px', color: 'var(--accent-secondary)', fontWeight: 'bold' }}>
                     (+{userPrediction.pointsAwarded || 0} pts)
                   </span>
                 )}
               </div>
             ) : (
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                 Sin predicción registrada
               </span>
             )}
           </div>
           
           {isUpcoming && (
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
+              {!deadlinePassed && (
+                <span style={{ fontSize: '0.75rem', color: '#eab308', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  Vence: {new Date(match.predictionDeadline).toLocaleTimeString('es-PE', {hour: '2-digit', minute:'2-digit'})}
+                </span>
+              )}
               {deadlinePassed ? (
                 <span style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 'bold' }}>
                   Límite expirado
@@ -145,7 +151,7 @@ export default function MatchesPage() {
                   style={{ padding: '8px 16px', fontSize: '0.85rem' }}
                   onClick={() => router.push(`/dashboard/matches/${match.id}`)}
                 >
-                  {userPrediction ? 'Editar' : 'Predecir'}
+                  {userPrediction ? 'Ver Predicción' : 'Predecir'}
                 </button>
               )}
             </div>
@@ -169,7 +175,7 @@ export default function MatchesPage() {
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
             Partidos en Vivo
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {liveMatches.map(m => renderMatchCard(m, false))}
           </div>
         </section>
@@ -181,7 +187,7 @@ export default function MatchesPage() {
         {upcomingMatches.length === 0 ? (
           <p style={{ color: 'var(--text-secondary)' }}>No hay próximos partidos programados.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {upcomingMatches.map(m => renderMatchCard(m, true))}
           </div>
         )}
@@ -193,7 +199,7 @@ export default function MatchesPage() {
         {finishedMatches.length === 0 ? (
           <p style={{ color: 'var(--text-secondary)' }}>No hay partidos finalizados registrados.</p>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '24px' }}>
             {finishedMatches.map(m => renderMatchCard(m, false))}
           </div>
         )}
