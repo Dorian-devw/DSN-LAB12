@@ -2,9 +2,6 @@ import { IsEmail, IsNotEmpty, IsString, Length, Matches } from 'class-validator'
 
 export class RequestOtpDto {
   @IsEmail({}, { message: 'Must be a valid email' })
-  @Matches(/^[a-zA-Z0-9._%+-]+@tecsup\.edu\.pe$/, {
-    message: 'Must be a valid @tecsup.edu.pe institutional email',
-  })
   email: string;
 }
 

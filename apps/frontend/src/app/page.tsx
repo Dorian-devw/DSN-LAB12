@@ -24,7 +24,7 @@ export default function Home() {
       });
       setStep(2);
     } catch (err: any) {
-      setError(err.message || 'Error al solicitar OTP. Asegúrate de usar un correo @tecsup.edu.pe');
+      setError(err.message || 'Error al solicitar OTP. Por favor verifica tu correo.');
     } finally {
       setLoading(false);
     }
@@ -117,10 +117,10 @@ export default function Home() {
             {step === 1 ? (
               <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Correo Institucional</label>
+                  <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-secondary)' }}>Correo Electrónico</label>
                   <input 
                     type="email" 
-                    placeholder="alumno@tecsup.edu.pe"
+                    placeholder="tucorreo@ejemplo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
