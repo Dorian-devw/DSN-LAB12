@@ -91,9 +91,10 @@ docker pull dorian778/goleate-backend:latest
 docker run -p 3000:3000 --env-file .env dorian778/goleate-backend:latest
 ```
 
-**Para construir la imagen localmente (Build):**
+**Para construir la imagen localmente y subir a Docker Hub:**
 ```bash
-docker build -t goleate-backend -f apps/backend/Dockerfile .
+docker build -t dorian778/goleate-backend:latest -f apps/backend/Dockerfile .
+docker push dorian778/goleate-backend:latest
 ```
 
 ---
