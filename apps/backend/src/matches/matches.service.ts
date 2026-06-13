@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { calculatePoints } from '../utils/scoring.util';
@@ -18,13 +18,18 @@ function getLevel(points: number): number {
 }
 
 @Injectable()
-export class MatchesService {
+export class MatchesService implements OnApplicationBootstrap {
   private readonly logger = new Logger(MatchesService.name);
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly achievementsService: AchievementsService,
   ) {}
+
+  async onApplicationBootstrap() {
+    this.logger.log('Bootstrapping MatchesService: Syncing matches on startup...');
+    await this.syncMatches();
+  }
 
   async getMatches() {
     return this.prisma.match.findMany({
